@@ -1,6 +1,12 @@
 
-Run the belwo commands as Oracle db owner OS user (command valid for UNIX & AIX) 
-#-------------------#-------------------#-------------------#-------------------
+Run the belwo commands (one lines commands) as Oracle db owner OS user (command valid for UNIX & AIX) 
+#=====================================================================================================
+
+#To validate the configuraiton post FSFO enable & disable  dgmgrl (with a sleep of 10 secs 5 times)  :
+#------------------------------------------------------------------------------------------
+#set the Oracle Sid & Oracle Home 
+for i in {1..5} ; do echo "show configuration "|dgmgrl / ; sleep 10; done ;
+
 ## To validate the StaticConnectIdentifier of DG broker (for both primary & standbys dbs by connecting to db using sysg user id & password before going to switch . 
 #---------------------------------------------------------------------------
 #set the Oracle Sid & Oracle Home 
@@ -20,3 +26,8 @@ swdb;[[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]]
 #------------------------------------------
 #set the Oracle Sid & Oracle Home 
 [[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]] && [[ $(echo "show configuration "|dgmgrl /  |grep Failover |grep ENABLED |wc -l) -ge 1 ]] && echo "Disable Fast_Start Failover "|dgmgrl /  ;  echo "show configuration "|dgmgrl / ;
+
+#To validate the configuraiton post FSFO enable & disable  dgmgrl (with a sleep of 10 secs 5 times)  :
+#------------------------------------------------------------------------------------------
+#set the Oracle Sid & Oracle Home 
+for i in {1..5} ; do echo "show configuration "|dgmgrl / ; sleep 10; done ;
