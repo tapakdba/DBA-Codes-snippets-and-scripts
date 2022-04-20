@@ -16,7 +16,7 @@ swdb;[[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]]
 #set the Oracle Sid & Oracle Home 
 [[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]] && [[ $(echo "show configuration "|dgmgrl /  | grep MaxAvailability |wc -l) -eq 1 ]] && [[ $(echo "show configuration "|dgmgrl /  |grep Failover |grep Disabled |wc -l) -eq 1 ]] && echo "Enable Fast_Start Failover "|dgmgrl /  ;  echo "show configuration "|dgmgrl /;
 
-#To enable FSFO (FAST STAST FAILOVER) using dgmgrl :
+#To disable FSFO (FAST STAST FAILOVER) using dgmgrl :
 #------------------------------------------
 #set the Oracle Sid & Oracle Home 
 [[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]] && [[ $(echo "show configuration "|dgmgrl /  |grep Failover |grep ENABLED |wc -l) -ge 1 ]] && echo "Disable Fast_Start Failover "|dgmgrl /  ;  echo "show configuration "|dgmgrl / ;
