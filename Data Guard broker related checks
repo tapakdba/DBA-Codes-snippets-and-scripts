@@ -11,7 +11,12 @@ clear;echo  " Please Enter the Password for sysdg : \c" ;read; PASSWORD=${REPLY}
 #set the Oracle Sid & Oracle Home 
 swdb;[[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]] && echo  " Please Enter the Password for sysdg : \c" ;read; PWD=${REPLY} ; echo " passwd: ${PWD} " ;PRIM=$(echo "show configuration "|dgmgrl /  |grep Primary |awk '{print $1}');echo "validate database verbose $PRIM" |dgmgrl sysdg/${PWD} ; echo "show configuration "|dgmgrl sysdg/${PWD}  |grep standby |awk '{print $1}'| while read line ; do echo "validate database verbose $line" |dgmgrl sysdg/${PWD}   ; done  ; echo "show configuration "|dgmgrl / ; 
 
-#To enable FSFO using dgmgrl :
+#To enable FSFO (FAST STAST FAILOVER)  using dgmgrl :
 #------------------------------------------
 #set the Oracle Sid & Oracle Home 
 [[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]] && [[ $(echo "show configuration "|dgmgrl /  | grep MaxAvailability |wc -l) -eq 1 ]] && [[ $(echo "show configuration "|dgmgrl /  |grep Failover |grep Disabled |wc -l) -eq 1 ]] && echo "Enable Fast_Start Failover "|dgmgrl /  ;  echo "show configuration "|dgmgrl /;
+
+#To enable FSFO (FAST STAST FAILOVER) using dgmgrl :
+#------------------------------------------
+#set the Oracle Sid & Oracle Home 
+[[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]] && [[ $(echo "show configuration "|dgmgrl /  |grep Failover |grep ENABLED |wc -l) -ge 1 ]] && echo "Disable Fast_Start Failover "|dgmgrl /  ;  echo "show configuration "|dgmgrl / ;
