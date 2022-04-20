@@ -1,0 +1,44 @@
+My own written code snipped for day to day job to work on Oracle dataguard broker (just copy the code & paste in $ prompt & see the result).
+==================================================================================================================================================================
+#To disable FSFO
+#-------------------
+[[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]] && [[ $(echo "show configuration "|dgmgrl /  |grep Failover |grep ENABLED |wc -l) -ge 1 ]] && echo "Disable Fast_Start Failover "|dgmgrl /  ;  echo "show configuration "|dgmgrl / ;
+
+
+#To enable FSFO:
+#-------------------
+[[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]] && [[ $(echo "show configuration "|dgmgrl /  | grep MaxAvailability |wc -l) -eq 1 ]] && [[ $(echo "show configuration "|dgmgrl /  |grep Failover |grep Disabled |wc -l) -eq 1 ]] && echo "Enable Fast_Start Failover "|dgmgrl /  ;  echo "show configuration "|dgmgrl /;
+
+
+To validate the primary & Standby  config :
+---------------------------------------------
+[[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]] && PRIM=$(echo "show configuration "|dgmgrl /  |grep Primary |awk '{print $1}'); STBY=$(echo "show configuration "|dgmgrl /  |grep standby |awk '{print $1}') ;echo "show database verbose $PRIM" |dgmgrl / ; echo "show database verbose $STBY" |dgmgrl / ;echo "show configuration "|dgmgrl / ; 
+
+
+To validate the primary & Standby With multiple standby :
+---------------------------------------------------------
+[[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]] && PRIM=$(echo "show configuration "|dgmgrl /  |grep Primary |awk '{print $1}');echo "show database verbose $PRIM" |dgmgrl / ; echo "show configuration "|dgmgrl /  |grep standby |awk '{print $1}'| while read line ; do echo "show database verbose $line" |dgmgrl /  ; done  ; echo "show configuration "|dgmgrl / ;
+
+
+To validate the config with SYSDG (if sysdg is used for synchup) before Switch :
+---------------------------------------------------------------------
+[[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]] && echo -en "Please Enter the Password for sysdg : " ;read; PWD=${REPLY} ;PRIM=$(echo "show configuration "|dgmgrl /  |grep Primary |awk '{print $1}');echo "validate database verbose $PRIM" |dgmgrl / ; echo "show configuration "|dgmgrl sysdg/$PWD  |grep standby |awk '{print $1}'| while read line ; do echo "validate database verbose $line" |dgmgrl sysdg/$PWD   ; done  ; echo "show configuration "|dgmgrl / ;
+
+
+
+
+
+
+DG broker Mode change (max Performance/Availability)
+===================================================
+To convert to Max Performance (force conver to Max Performance):
+---------------------------------------------------------
+[[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]] && [[ $(echo "show configuration "|dgmgrl /  |grep Failover |grep Enabled |wc -l) -ge 1 ]] && echo "Disable Fast_Start Failover "|dgmgrl /  ;  echo "show configuration "|dgmgrl /;if [ $(echo "show configuration "|dgmgrl /  | grep -e MaxAvailability -e MaxPerformance |wc -l) -eq 1 ] ;then  PRIM=$(echo "show configuration "|dgmgrl /  |grep Primary |awk '{print $1}');echo "sql \"alter database set standby database to maximize PERFORMANCE\"" |dgmgrl / ; echo "EDIT CONFIGURATION SET PROTECTION MODE AS maxperformance;" |dgmgrl / ;echo "edit database "$PRIM" set property LogXptMode='ASYNC';"|dgmgrl / ;echo "enable database $PRIM " |dgmgrl / ; echo "show configuration "|dgmgrl /  |grep standby |awk '{print $1}'| while read line ; do echo "edit database $line set property LogXptMode='ASYNC';" |dgmgrl /  ; echo "enable database $line " |dgmgrl / ; done  ;sleep 10;echo "show configuration "|dgmgrl / ; else echo "show configuration "|dgmgrl / ; fi ;
+
+
+
+
+To convert Standbys to Max Availability & enable FSFO (after a sleep of 30 sec):
+--------------------------------------------------------------
+[[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]] && if [ $(echo "show configuration "|dgmgrl /  | grep -e MaxAvailability -e MaxPerformance |wc -l) -eq 1 ] ;then  PRIM=$(echo "show configuration "|dgmgrl /  |grep Primary |awk '{print $1}'); echo "sql \"alter database set standby database to maximize availability\"" |dgmgrl / ;echo "edit database "$PRIM" set property LogXptMode='SYNC';"|dgmgrl / ; echo "show configuration "|dgmgrl /  |grep standby |awk '{print $1}'| while read line ; do echo "edit database $line set property LogXptMode='SYNC';" |dgmgrl /  ; echo "enable database $line " |dgmgrl / ; done  ; echo "EDIT CONFIGURATION SET PROTECTION MODE AS maxavailability;" |dgmgrl / ;sleep 10; echo "show configuration "|dgmgrl / ; else echo "show configuration "|dgmgrl / ; fi ; sleep 30 ;[[ $(echo "show configuration " | dgmgrl / |grep ORA-16525 |wc -l) -eq 0 ]] && [[ $(echo "show configuration "|dgmgrl /  |grep Failover |grep Disabled |wc -l) -eq 1 ]] && [[ $(echo "show configuration "|dgmgrl /  | grep MaxAvailability |wc -l) -eq 1 ]] && [[ $(echo "show configuration "|dgmgrl /  | grep SUCCESS |wc -l) -eq 1 ]] && echo "Enable Fast_Start Failover "|dgmgrl /  ;  echo "show configuration "|dgmgrl /;
+	
